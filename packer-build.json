@@ -1,0 +1,75 @@
+{
+    "variables": {
+      "date": "{{user `date`}}",
+      "os_revision": "{{user `os_revision`}}",
+      "org": "{{user `org`}}"
+    },
+      "builders": [
+        {
+          "vpc_filter": {
+            "filters": {
+              "tag:Environment": "res-id-mgmt"
+            }
+          },
+          "subnet_filter": {
+            "filters": {
+              "tag:Name": "id-mgmt-subnet-*",
+              "tag:owner": "id-sre"
+            },
+            "most_free": true,
+            "random": false
+          },
+          "type": "amazon-ebs",
+          "profile": "default",
+          "instance_type": "t2.micro",
+          "skip_region_validation": true,
+          "source_ami_filter": {
+            "filters": {
+              "virtualization-type": "hvm",
+              "root-device-type": "ebs",
+              "architecture": "x86_64",
+              "name": "CentOS {{user `os_revision`}}.* x86_64"
+            },
+            "most_recent": "true",
+            "owners": ["125523088429"]
+          },
+          "security_group_filter": {
+            "filters": {
+              "tag:Name": "ops_sjk_core_sg",
+              "tag:region": "us-west-2",
+              "tag:owner": "identity"
+            }
+          },
+          "ssh_username": "centos",
+          "ami_name": "nbcu-base-centos{{user `os_revision`}}-{{user `date`}}",
+          "ami_users": ["304704835263", "417638063715", "884035512442"],
+          "ami_regions": [ "us-east-2", "us-west-2" ],
+          "ami_description": "nbcu-base-centos{{user `os_revision`}}-{{user `date`}} built via packer.",
+          "tags": [
+            {
+              "Name": "nbcu-base-centos{{user `os_revision`}}-{{user `date`}}",
+              "Tool": "Packer",
+              "Date": "{{user `date`}}",
+              "Owner": "id-sre",
+              "Revision": "Centos{{user `os_revision`}}"
+            }
+          ],
+          "run_tags": [
+            {
+              "Name": "nbcu-base-centos{{user `os_revision`}}-{{user `date`}}",
+              "Tool": "Packer",
+              "Date": "{{user `date`}}",
+              "Owner": "id-sre",
+              "Revision": "Centos{{user `os_revision`}}"
+            }
+          ]
+        }
+      ],
+      "provisioners": [
+        {
+          "type": "ansible",
+          "playbook_file": "./playbook.yml",
+          "extra_arguments": [ "--extra-vars", "ORG={{user `org`}} proxy_server='proxy.id.us-west-2.mgmt-aws.geoott.com'" ]
+        }
+      ]
+  }

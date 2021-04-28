@@ -24,5 +24,15 @@
             },
             "ssh_username": "ubuntu"
         }
-    ]
+    ],
+    "provisioners": {
+        {
+            "type": "shell",
+            "inline": ["sudo apt update -y && sudo apt upgrade -y"]
+        },
+        {
+            "type": "shell",
+            "script": "init.sh" 
+        }
+    }
 }
